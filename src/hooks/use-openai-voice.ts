@@ -15,7 +15,7 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
   const [isConnected, setIsConnected] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const { toast } = useToast();
-  const { voice, model, prompt, promptPreset } = useSettings();
+  const { voice, model } = useSettings();
 
   // Handle incoming server events
   const handleServerEvent = (event: any) => {
@@ -24,14 +24,12 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
     switch (data.type) {
       case 'session.created':
         console.log('Session created:', data);
-        // Send session update with current prompt configuration
+        // Send session update with voice prompt configuration
         if (dataChannel.current) {
-          const currentPrompt = prompt || VOICE_SYSTEM_PROMPT.content;
-          console.log('Using prompt:', currentPrompt);
           dataChannel.current.send(JSON.stringify({
             type: 'session.update',
             session: {
-              instructions: currentPrompt
+              instructions: VOICE_SYSTEM_PROMPT.content
             }
           }));
         }
@@ -43,12 +41,10 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
 
       case 'input_audio_buffer.speech_started':
         setIsStreaming(true);
-        onStreamStart?.();
         break;
 
       case 'input_audio_buffer.speech_stopped':
         setIsStreaming(false);
-        onStreamEnd?.();
         break;
 
       case 'error':
@@ -171,29 +167,6 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
       onStreamEnd?.();
     }
   };
-
-  // Effect to handle prompt changes
-  useEffect(() => {
-    if (isConnected && dataChannel.current) {
-      const currentPrompt = prompt || VOICE_SYSTEM_PROMPT.content;
-      console.log('Updating prompt:', currentPrompt);
-      dataChannel.current.send(JSON.stringify({
-        type: 'session.update',
-        session: {
-          instructions: currentPrompt
-        }
-      }));
-    }
-  }, [prompt, promptPreset, isConnected]);
-
-  // Effect to handle voice/model changes
-  useEffect(() => {
-    if (isConnected) {
-      // Reinitialize connection when voice or model changes
-      disconnect();
-      initialize();
-    }
-  }, [voice, model]);
 
   // Cleanup on unmount
   useEffect(() => {
