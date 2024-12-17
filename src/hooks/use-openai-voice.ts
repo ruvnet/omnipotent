@@ -103,20 +103,26 @@ export function useOpenAIVoice({
       await peerConnection.current.setLocalDescription(offer);
 
       try {
-        // Ensure headers are properly encoded
+        // Create headers with the current voice and model settings
+        const currentVoice = voice || 'alloy';
+        const currentModel = model || 'gpt-4';
+        
         const headers = new Headers({
           'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/sdp',
-          'X-OpenAI-Voice': voice || 'alloy',
-          'X-OpenAI-Model': model || 'gpt-4',
+          'X-OpenAI-Voice': currentVoice,
+          'X-OpenAI-Model': currentModel,
         });
 
-        // Add context as a separate header with proper encoding
+        // Add context as a separate header
         const contextHeader = JSON.stringify({
           prompt: VOICE_SYSTEM_PROMPT.content,
-          conversation_history: conversationHistory
+          conversation_history: conversationHistory,
+          voice: currentVoice // Include voice in context
         });
         headers.append('X-OpenAI-Assistant-Context', contextHeader);
+
+        console.log('Using voice:', currentVoice); // Debug log
 
         const resp = await fetch('https://api.openai.com/v1/realtime', {
           method: 'POST',
