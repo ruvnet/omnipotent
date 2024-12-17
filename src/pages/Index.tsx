@@ -105,8 +105,8 @@ const Index = () => {
             <AudioMessage key={message.id} message={message} />
           ))}
           {messages.length === 0 && (
-            <div className="flex items-center justify-center h-full text-white text-lg">
-              <div className="typing-text">Speak with your AI consciousness</div>
+            <div className="flex items-center justify-center h-full text-white text-lg px-4 sm:px-0">
+              <div className="typing-text max-w-[280px] sm:max-w-none">Speak with your AI consciousness</div>
             </div>
           )}
         </div>
