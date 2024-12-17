@@ -23,7 +23,9 @@ export function useOpenAIVoice({
   const [transcription, setTranscription] = useState<string>('');
   const { toast } = useToast();
   const { voice, model, prompt } = useSettings();
-  const [conversationHistory, setConversationHistory] = useState<Array<{ role: string; content: string }>>([]);
+  const [conversationHistory, setConversationHistory] = useState<Array<{ role: string; content: string }>>([
+    { role: 'system', content: prompt }
+  ]);
 
   // Handle incoming transcription from OpenAI
   const handleTranscription = (text: string) => {
@@ -37,7 +39,6 @@ export function useOpenAIVoice({
 
   // Process response using our voice prompt system
   const processResponse = async (text: string) => {
-    const customPrompt = { role: 'system', content: prompt };
     const response = formatVoiceResponse(text);
     
     // Add assistant response to conversation history
@@ -115,6 +116,7 @@ export function useOpenAIVoice({
 
         console.log('Using voice:', currentVoice);
         console.log('Using prompt:', prompt);
+        console.log('Conversation history:', conversationHistory);
 
         const resp = await fetch('https://api.openai.com/v1/realtime', {
           method: 'POST',
