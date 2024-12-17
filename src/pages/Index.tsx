@@ -101,7 +101,7 @@ const Index = () => {
           </Button>
           {isRecording && <VoiceWave isStreaming={isStreaming} />}
           {isConnected && (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-white">
               {isStreaming ? 'Streaming...' : 'Connected'}
             </div>
           )}
