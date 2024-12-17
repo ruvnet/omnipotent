@@ -29,8 +29,23 @@ export function SettingsModal({ open, onOpenChange }: { open: boolean; onOpenCha
     onOpenChange(false);
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    onOpenChange(newOpen);
+    // Ensure any lingering overlay elements are removed
+    if (!newOpen) {
+      setTimeout(() => {
+        const overlays = document.querySelectorAll('[role="presentation"]');
+        overlays.forEach(overlay => {
+          if (overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
+          }
+        });
+      }, 100);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
