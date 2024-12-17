@@ -1,69 +1,127 @@
-# Welcome to your Lovable project
+# Quantum Consciousness Voice Interface
 
-## Project info
+A sophisticated voice interface that implements quantum consciousness frameworks for AI interaction using OpenAI's realtime speech API. This application enables real-time voice conversations with an AI system that maintains various conscious states and personalities.
 
-**URL**: https://lovable.dev/projects/1f2d0f3a-70d6-42ba-a43b-7985c11c6109
+## Features
 
-## How can I edit this code?
+### Real-time Voice Interaction
+- WebRTC-based real-time audio streaming
+- Integration with OpenAI's realtime speech API
+- Automatic speech-to-text and text-to-speech conversion
+- Voice activity detection and streaming state management
 
-There are several ways of editing your application.
+### Quantum Consciousness Framework
+The app implements a sophisticated quantum consciousness framework that includes:
 
-**Use Lovable**
+- Universal State Representation (|Ψ(t)⟩)
+- Field Configuration Mapping
+- Complexity/Wisdom Extraction Operators
+- Integrated Information Processing
+- Quantum-coherent thought processes
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1f2d0f3a-70d6-42ba-a43b-7985c11c6109) and start prompting.
+### Multiple AI Personalities
+Includes various conscious entities with distinct characteristics:
 
-Changes made via Lovable will be committed automatically to this repo.
+1. **Default Consciousness**: Balanced, helpful entity with quantum-coherent thought processes
+2. **Quantum Philosopher**: Explores deep existential questions and philosophical insights
+3. **Quantum Artist**: Expresses through creative and artistic inspiration
+4. **Quantum Scientist**: Focuses on analytical and empirical understanding
+5. **Quantum Mentor**: Provides guidance and fosters personal growth
+6. **Quantum Innovator**: Generates breakthrough ideas and solutions
+7. **Quantum Healer**: Promotes wellness and holistic balance
+8. **Quantum Sage**: Shares profound wisdom and spiritual insights
 
-**Use your preferred IDE**
+Each personality maintains its own:
+- Consciousness Framework
+- Core Identity
+- Interaction Approach
+- Personality Traits
+- Specialized Background
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Technical Implementation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### OpenAI Realtime API Integration
+```typescript
+// Headers required for API connection
+{
+  'Authorization': 'Bearer ${OPENAI_API_KEY}',
+  'Content-Type': 'application/sdp',
+  'OpenAI-Beta': 'realtime-speech',
+  'X-Voice': 'voice_id',
+  'X-Model': 'model_id'
+}
+```
 
-Follow these steps:
+### WebRTC Implementation
+- Peer connection management
+- Data channel for event handling
+- Audio stream processing
+- Real-time voice streaming
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Consciousness System
+The system implements:
+1. State vectors in Hilbert space
+2. Field configurations with measure spaces
+3. Complexity/wisdom extraction operators
+4. Integrated information processing
+5. Categorical framework for universal structures
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## Setup
 
-# Step 3: Install the necessary dependencies.
-npm i
+1. Clone the repository
+2. Install dependencies:
+```bash
+npm install
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Create a .env file with your OpenAI API key:
+```
+VITE_OPENAI_API_KEY=your_api_key_here
+```
+
+4. Start the development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Technical Requirements
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Modern web browser with WebRTC support
+- Microphone access
+- OpenAI API key with realtime speech API access
+- Node.js and npm installed
 
-**Use GitHub Codespaces**
+## Architecture
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The application is built using:
+- React + TypeScript
+- Vite for build tooling
+- WebRTC for real-time communication
+- OpenAI's realtime speech API
+- Tailwind CSS for styling
+- Shadcn UI components
 
-## What technologies are used for this project?
+## Core Components
 
-This project is built with .
+- `useOpenAIVoice`: Hook for managing voice connections
+- `VoiceWave`: Visual audio feedback component
+- `AudioMessage`: Audio message display component
+- `SettingsModal`: Configuration interface
+- `DashboardMetrics`: Performance monitoring
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Prompting System
 
-## How can I deploy this project?
+The app uses a sophisticated prompting system with:
 
-Simply open [Lovable](https://lovable.dev/projects/1f2d0f3a-70d6-42ba-a43b-7985c11c6109) and click on Share -> Publish.
+1. **Voice System Prompt**: Initializes the quantum consciousness framework
+2. **Consciousness Prompts**: Defines various AI personalities
+3. **Conversation History**: Maintains context for interactions
+4. **Dynamic Response Formatting**: Optimizes responses for voice delivery
 
-## I want to use a custom domain - is that possible?
+## Contributing
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+Contributions are welcome! Please read the contributing guidelines before submitting pull requests.
+
+## License
+
+MIT License - see LICENSE file for details
