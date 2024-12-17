@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { useSettings } from '@/stores/settingsStore';
-import { VOICE_SYSTEM_PROMPT } from '@/lib/voice-prompt';
+import { formatVoiceResponse } from '@/lib/voice-prompt';
 
 interface UseOpenAIVoiceProps {
   onStreamStart?: () => void;
@@ -15,7 +15,17 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
   const [isConnected, setIsConnected] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const { toast } = useToast();
-  const { voice, model } = useSettings();
+  const { voice, model, prompt, promptPreset, PROMPT_PRESETS } = useSettings();
+
+  // Get the active prompt content
+  const getActivePrompt = () => {
+    // If there's a custom prompt, use it
+    if (prompt?.trim()) {
+      return prompt;
+    }
+    // Otherwise use the selected preset's content
+    return PROMPT_PRESETS[promptPreset]?.content || '';
+  };
 
   // Handle incoming server events
   const handleServerEvent = (event: any) => {
@@ -24,12 +34,12 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
     switch (data.type) {
       case 'session.created':
         console.log('Session created:', data);
-        // Send session update with voice prompt configuration
+        // Send session update with current prompt configuration
         if (dataChannel.current) {
           dataChannel.current.send(JSON.stringify({
             type: 'session.update',
             session: {
-              instructions: VOICE_SYSTEM_PROMPT.content
+              instructions: getActivePrompt()
             }
           }));
         }
