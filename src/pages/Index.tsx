@@ -12,6 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useOpenAIVoice } from '@/hooks/use-openai-voice';
+import { SettingsModal } from '@/components/SettingsModal';
+import { AboutModal } from '@/components/AboutModal';
 import "@fontsource/space-grotesk";
 
 interface AudioMessage {
@@ -23,6 +25,8 @@ interface AudioMessage {
 const Index = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [messages, setMessages] = useState<AudioMessage[]>([]);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const { toast } = useToast();
 
   const { initialize, disconnect, isConnected, isStreaming } = useOpenAIVoice({
@@ -83,10 +87,10 @@ const Index = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setAboutOpen(true)}>
                 About
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -130,6 +134,9 @@ const Index = () => {
           )}
         </div>
       </Card>
+
+      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <AboutModal open={aboutOpen} onOpenChange={setAboutOpen} />
     </div>
   );
 };
