@@ -2,14 +2,14 @@ import { useRef, useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { useSettings } from '@/stores/settingsStore';
 import { VOICE_SYSTEM_PROMPT } from '@/lib/voice-prompt';
-import { VoiceMessage, UseOpenAIVoiceProps } from '@/types/voice';
 
-export function useOpenAIVoice({ 
-  onStreamStart, 
-  onStreamEnd, 
-  onError,
-  onMessageReceived 
-}: UseOpenAIVoiceProps = {}) {
+interface UseOpenAIVoiceProps {
+  onStreamStart?: () => void;
+  onStreamEnd?: () => void;
+  onError?: (error: string) => void;
+}
+
+export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenAIVoiceProps = {}) {
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const dataChannel = useRef<RTCDataChannel | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -20,11 +20,11 @@ export function useOpenAIVoice({
   // Handle incoming server events
   const handleServerEvent = (event: any) => {
     const data = JSON.parse(event.data);
-    console.log('Received server event:', data.type);
     
     switch (data.type) {
       case 'session.created':
         console.log('Session created:', data);
+        // Send session update with voice prompt configuration
         if (dataChannel.current) {
           dataChannel.current.send(JSON.stringify({
             type: 'session.update',
@@ -35,33 +35,16 @@ export function useOpenAIVoice({
         }
         break;
 
-      case 'input_audio_buffer.speech_started':
-        setIsStreaming(true);
-        if (data.audio) {
-          console.log('Creating user audio message');
-          const message: VoiceMessage = {
-            id: crypto.randomUUID(),
-            type: 'user',
-            blob: new Blob([data.audio], { type: 'audio/mp3' }),
-            duration: data.duration || 0,
-            timestamp: Date.now()
-          };
-          onMessageReceived?.(message);
-        }
+      case 'session.updated':
+        console.log('Session updated:', data);
         break;
 
-      case 'assistant.response':
-        if (data.audio) {
-          console.log('Creating assistant audio message');
-          const message: VoiceMessage = {
-            id: crypto.randomUUID(),
-            type: 'assistant',
-            blob: new Blob([data.audio], { type: 'audio/mp3' }),
-            duration: data.duration || 0,
-            timestamp: Date.now()
-          };
-          onMessageReceived?.(message);
-        }
+      case 'input_audio_buffer.speech_started':
+        setIsStreaming(true);
+        break;
+
+      case 'input_audio_buffer.speech_stopped':
+        setIsStreaming(false);
         break;
 
       case 'error':
