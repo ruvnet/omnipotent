@@ -1,9 +1,11 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { useSettings, VoiceOption, ModelOption } from "@/stores/settingsStore";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "@/components/ui/use-toast";
 
 const VOICE_OPTIONS: VoiceOption[] = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'];
 const MODEL_OPTIONS: ModelOption[] = ['tts-1', 'tts-1-hd'];
@@ -17,6 +19,14 @@ export function SettingsModal({ open, onOpenChange }: { open: boolean; onOpenCha
 
   const handleModelChange = (value: string) => {
     setModel(value as ModelOption);
+  };
+
+  const handleSave = () => {
+    toast({
+      title: "Settings saved",
+      description: "Your settings have been saved successfully.",
+    });
+    onOpenChange(false);
   };
 
   return (
@@ -79,6 +89,9 @@ export function SettingsModal({ open, onOpenChange }: { open: boolean; onOpenCha
             </div>
           </TabsContent>
         </Tabs>
+        <DialogFooter>
+          <Button onClick={handleSave}>Save Changes</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
