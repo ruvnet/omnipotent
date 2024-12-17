@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useEffect } from "react";
 
 const VOICE_OPTIONS: VoiceOption[] = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'];
 const MODEL_OPTIONS: ModelOption[] = ['tts-1', 'tts-1-hd'];
@@ -24,21 +23,6 @@ export function SettingsModal({ open, onOpenChange }: { open: boolean; onOpenCha
     setPrompt,
     setPromptPreset 
   } = useSettings();
-
-  // Cleanup function to remove any lingering overlays
-  const cleanupOverlays = () => {
-    const overlays = document.querySelectorAll('[role="presentation"]');
-    overlays.forEach(overlay => {
-      if (overlay.parentNode) {
-        overlay.parentNode.removeChild(overlay);
-      }
-    });
-  };
-
-  // Clean up overlays when component unmounts
-  useEffect(() => {
-    return () => cleanupOverlays();
-  }, []);
 
   const handleVoiceChange = (value: string) => {
     setVoice(value as VoiceOption);
@@ -75,8 +59,14 @@ export function SettingsModal({ open, onOpenChange }: { open: boolean; onOpenCha
   const handleOpenChange = (newOpen: boolean) => {
     onOpenChange(newOpen);
     if (!newOpen) {
-      // Add a small delay to ensure animations complete
-      setTimeout(cleanupOverlays, 300);
+      setTimeout(() => {
+        const overlays = document.querySelectorAll('[role="presentation"]');
+        overlays.forEach(overlay => {
+          if (overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
+          }
+        });
+      }, 100);
     }
   };
 

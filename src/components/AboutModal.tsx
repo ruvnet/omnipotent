@@ -2,31 +2,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSettings } from "@/stores/settingsStore";
 import { Badge } from "@/components/ui/badge";
-import { useEffect } from "react";
 
 export function AboutModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { character, story } = useSettings();
 
-  // Cleanup function to remove any lingering overlays
-  const cleanupOverlays = () => {
-    const overlays = document.querySelectorAll('[role="presentation"]');
-    overlays.forEach(overlay => {
-      if (overlay.parentNode) {
-        overlay.parentNode.removeChild(overlay);
-      }
-    });
-  };
-
-  // Clean up overlays when component unmounts
-  useEffect(() => {
-    return () => cleanupOverlays();
-  }, []);
-
   const handleOpenChange = (newOpen: boolean) => {
     onOpenChange(newOpen);
+    // Ensure any lingering overlay elements are removed
     if (!newOpen) {
-      // Add a small delay to ensure animations complete
-      setTimeout(cleanupOverlays, 300);
+      setTimeout(() => {
+        const overlays = document.querySelectorAll('[role="presentation"]');
+        overlays.forEach(overlay => {
+          if (overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
+          }
+        });
+      }, 100);
     }
   };
 

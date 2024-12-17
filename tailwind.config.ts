@@ -70,7 +70,7 @@ const config = {
         wave: {
           "0%, 100%": { transform: "scaleY(0.5)" },
           "50%": { transform: "scaleY(2)" },
-        }
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
