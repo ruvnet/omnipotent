@@ -5,6 +5,7 @@ import { Mic, Square, MessageSquare, Menu } from "lucide-react";
 import { VoiceWave } from '@/components/VoiceWave';
 import { AudioMessage } from '@/components/AudioMessage';
 import { useToast } from '@/components/ui/use-toast';
+import { ScrollingResponse } from '@/components/ScrollingResponse';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +29,7 @@ const Index = () => {
   const [transcribedText, setTranscribedText] = useState<string>('');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [showScrollingText, setShowScrollingText] = useState(false);
   const { toast } = useToast();
 
   const { initialize, disconnect, isConnected, isStreaming } = useOpenAIVoice({
@@ -36,6 +38,7 @@ const Index = () => {
         title: "Connected to OpenAI",
         description: "Voice streaming has started",
       });
+      setShowScrollingText(true);
     },
     onStreamEnd: () => {
       toast({
@@ -43,6 +46,8 @@ const Index = () => {
         description: "Voice streaming has ended",
       });
       setIsRecording(false);
+      // Keep the text visible for a moment before fading
+      setTimeout(() => setShowScrollingText(false), 5000);
     },
     onError: (error) => {
       toast({
@@ -51,6 +56,7 @@ const Index = () => {
         variant: "destructive",
       });
       setIsRecording(false);
+      setShowScrollingText(false);
     }
   });
 
@@ -98,6 +104,11 @@ const Index = () => {
           </DropdownMenu>
         </div>
       </div>
+      
+      <ScrollingResponse 
+        text={transcribedText || "Listening..."}
+        isVisible={showScrollingText}
+      />
       
       <Card className="max-w-2xl mx-auto h-[80vh] glass-panel flex flex-col rounded-[2rem] overflow-hidden border-0">
         <div className="p-6 flex-1 space-y-4 overflow-y-auto">
