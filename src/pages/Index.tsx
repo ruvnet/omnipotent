@@ -25,6 +25,7 @@ interface AudioMessage {
 const Index = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [messages, setMessages] = useState<AudioMessage[]>([]);
+  const [transcribedText, setTranscribedText] = useState<string>('');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const { toast } = useToast();
