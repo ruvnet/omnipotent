@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { useSettings } from '@/stores/settingsStore';
+import { useSettings, PROMPT_PRESETS } from '@/stores/settingsStore';
 import { formatVoiceResponse } from '@/lib/voice-prompt';
 
 interface UseOpenAIVoiceProps {
@@ -15,7 +15,7 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
   const [isConnected, setIsConnected] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const { toast } = useToast();
-  const { voice, model, prompt, promptPreset, PROMPT_PRESETS } = useSettings();
+  const { voice, model, prompt, promptPreset } = useSettings();
 
   // Get the active prompt content
   const getActivePrompt = () => {
