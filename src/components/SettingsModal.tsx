@@ -1,28 +1,31 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { useSettings, VoiceOption, ModelOption, PROMPT_PRESETS } from "@/stores/settingsStore";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "@/components/ui/use-toast";
-import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "./ui/dialog";
+import { Label } from "./ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Textarea } from "./ui/textarea";
+import { Button } from "./ui/button";
+import { useSettings, VoiceOption, ModelOption, PROMPT_PRESETS } from "../stores/settingsStore";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { toast } from "./ui/use-toast";
+import { Card } from "./ui/card";
+import { ScrollArea } from "./ui/scroll-area";
 
 const VOICE_OPTIONS: VoiceOption[] = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'];
 const MODEL_OPTIONS: ModelOption[] = ['tts-1', 'tts-1-hd'];
 
 export function SettingsModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-  const { 
-    voice, 
-    model, 
-    prompt, 
+  const {
+    voice,
+    model,
+    prompt,
     promptPreset,
-    setVoice, 
-    setModel, 
+    setVoice,
+    setModel,
     setPrompt,
-    setPromptPreset 
+    setPromptPreset
   } = useSettings();
+
+  const currentPreset = promptPreset || 'default';
+  const presetData = PROMPT_PRESETS[currentPreset] || PROMPT_PRESETS['default'];
 
   const handleVoiceChange = (value: string) => {
     setVoice(value as VoiceOption);
@@ -69,6 +72,10 @@ export function SettingsModal({ open, onOpenChange }: { open: boolean; onOpenCha
       }, 100);
     }
   };
+
+  if (!promptPreset || !PROMPT_PRESETS[promptPreset]) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

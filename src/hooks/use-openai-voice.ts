@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
-import { useToast } from '@/components/ui/use-toast';
-import { useSettings } from '@/stores/settingsStore';
-import { VOICE_SYSTEM_PROMPT } from '@/lib/voice-prompt';
+import { useToast } from "../components/ui/use-toast";
+import { useSettings } from "../stores/settingsStore";
+import { VOICE_SYSTEM_PROMPT } from "../lib/voice-prompt";
 
 interface UseOpenAIVoiceProps {
   onStreamStart?: () => void;

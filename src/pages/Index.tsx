@@ -1,19 +1,11 @@
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Mic, Square, MessageSquare, Menu } from "lucide-react";
-import { VoiceWave } from '@/components/VoiceWave';
-import { AudioMessage } from '@/components/AudioMessage';
-import { useToast } from '@/components/ui/use-toast';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useOpenAIVoice } from '@/hooks/use-openai-voice';
-import { SettingsModal } from '@/components/SettingsModal';
-import { AboutModal } from '@/components/AboutModal';
+import { Button } from "../components/ui/button";
+import { Card } from "../components/ui/card";
+import { Mic, Square, MessageSquare } from "lucide-react";
+import { VoiceWave } from "../components/VoiceWave";
+import { AudioMessage } from "../components/AudioMessage";
+import { useToast } from "../components/ui/use-toast";
+import { useOpenAIVoice } from "../hooks/use-openai-voice";
 import "@fontsource/space-grotesk";
 
 interface AudioMessage {
@@ -26,8 +18,6 @@ const Index = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [messages, setMessages] = useState<AudioMessage[]>([]);
   const [transcribedText, setTranscribedText] = useState<string>('');
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [aboutOpen, setAboutOpen] = useState(false);
   const { toast } = useToast();
 
   const { initialize, disconnect, isConnected, isStreaming } = useOpenAIVoice({
@@ -74,28 +64,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-red-950 via-red-900 to-black">
-      <div className="flex justify-between items-center mb-8 max-w-2xl mx-auto">
-        <div className="flex-1" />
+      <div className="flex justify-center items-center mb-8 max-w-2xl mx-auto">
         <div className="flex flex-col items-center">
           <MessageSquare className="w-8 h-8 text-red-500 mb-2" />
           <h1 className="text-2xl font-semibold text-red-500/90 font-space-grotesk">Omnipotent</h1>
-        </div>
-        <div className="flex-1 flex justify-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Menu className="h-5 w-5 text-white" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setAboutOpen(true)}>
-                About
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
       
@@ -135,9 +107,6 @@ const Index = () => {
           )}
         </div>
       </Card>
-
-      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <AboutModal open={aboutOpen} onOpenChange={setAboutOpen} />
     </div>
   );
 };
