@@ -1,0 +1,32 @@
+:root {
+  /* Monochromatic Futuristic Blue Theme */
+  --background: 220 100% 8%;
+  --foreground: 220 10% 98%;
+  
+  --primary: 220 100% 50%;
+  --primary-foreground: 220 10% 98%;
+  
+  --secondary: 220 70% 30%;
+  --secondary-foreground: 220 10% 98%;
+  
+  --muted: 220 30% 20%;
+  --muted-foreground: 220 10% 70%;
+  
+  --accent: 220 100% 60%;
+  --accent-foreground: 220 10% 98%;
+  
+  --destructive: 0 100% 50%;
+  --destructive-foreground: 220 10% 98%;
+  
+  --card: 220 50% 15%;
+  --card-foreground: 220 10% 98%;
+  
+  --popover: 220 50% 15%;
+  --popover-foreground: 220 10% 98%;
+  
+  --border: 220 30% 25%;
+  --input: 220 30% 25%;
+  --ring: 220 100% 50%;
+  
+  --radius: 1rem;
+}
