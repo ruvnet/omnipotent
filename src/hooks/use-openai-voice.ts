@@ -7,10 +7,9 @@ interface UseOpenAIVoiceProps {
   onStreamStart?: () => void;
   onStreamEnd?: () => void;
   onError?: (error: string) => void;
-  onTranscriptUpdate?: (text: string) => void;
 }
 
-export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError, onTranscriptUpdate }: UseOpenAIVoiceProps = {}) {
+export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenAIVoiceProps = {}) {
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const dataChannel = useRef<RTCDataChannel | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -42,12 +41,10 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError, onTranscri
 
       case 'input_audio_buffer.speech_started':
         setIsStreaming(true);
-        onStreamStart?.();
         break;
 
       case 'input_audio_buffer.speech_stopped':
         setIsStreaming(false);
-        onStreamEnd?.();
         break;
 
       case 'error':
@@ -58,18 +55,6 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError, onTranscri
           variant: "destructive",
         });
         onError?.(message);
-        break;
-
-      case 'transcript':
-        if (data.text) {
-          onTranscriptUpdate?.(data.text);
-        }
-        break;
-
-      case 'assistant_response':
-        if (data.text) {
-          onTranscriptUpdate?.(data.text);
-        }
         break;
     }
   };
