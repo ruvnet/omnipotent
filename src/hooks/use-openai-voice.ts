@@ -2,14 +2,14 @@ import { useRef, useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { useSettings } from '@/stores/settingsStore';
 import { VOICE_SYSTEM_PROMPT } from '@/lib/voice-prompt';
+import { VoiceMessage, UseOpenAIVoiceProps } from '@/types/voice';
 
-interface UseOpenAIVoiceProps {
-  onStreamStart?: () => void;
-  onStreamEnd?: () => void;
-  onError?: (error: string) => void;
-}
-
-export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenAIVoiceProps = {}) {
+export function useOpenAIVoice({ 
+  onStreamStart, 
+  onStreamEnd, 
+  onError,
+  onMessageReceived 
+}: UseOpenAIVoiceProps = {}) {
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const dataChannel = useRef<RTCDataChannel | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -41,10 +41,33 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
 
       case 'input_audio_buffer.speech_started':
         setIsStreaming(true);
+        if (data.audio) {
+          const message: VoiceMessage = {
+            id: crypto.randomUUID(),
+            type: 'user',
+            blob: new Blob([data.audio], { type: 'audio/mp3' }),
+            duration: data.duration || 0,
+            timestamp: Date.now()
+          };
+          onMessageReceived?.(message);
+        }
         break;
 
       case 'input_audio_buffer.speech_stopped':
         setIsStreaming(false);
+        break;
+
+      case 'assistant.response':
+        if (data.audio) {
+          const message: VoiceMessage = {
+            id: crypto.randomUUID(),
+            type: 'assistant',
+            blob: new Blob([data.audio], { type: 'audio/mp3' }),
+            duration: data.duration || 0,
+            timestamp: Date.now()
+          };
+          onMessageReceived?.(message);
+        }
         break;
 
       case 'error':
