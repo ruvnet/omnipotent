@@ -1,17 +1,51 @@
 import { useRef, useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
+import { useSettings } from '@/stores/settingsStore';
+import { createVoicePrompt, formatVoiceResponse, VOICE_SYSTEM_PROMPT } from '@/lib/voice-prompt';
 
 interface UseOpenAIVoiceProps {
   onStreamStart?: () => void;
   onStreamEnd?: () => void;
   onError?: (error: string) => void;
+  onTranscription?: (text: string) => void;
 }
 
-export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenAIVoiceProps = {}) {
+export function useOpenAIVoice({ 
+  onStreamStart, 
+  onStreamEnd, 
+  onError,
+  onTranscription 
+}: UseOpenAIVoiceProps = {}) {
   const peerConnection = useRef<RTCPeerConnection | null>(null);
+  const dataChannel = useRef<RTCDataChannel | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [transcription, setTranscription] = useState<string>('');
   const { toast } = useToast();
+  const { voice, model } = useSettings();
+  const [conversationHistory, setConversationHistory] = useState<Array<{ role: string; content: string }>>([]);
+
+  // Handle incoming transcription from OpenAI
+  const handleTranscription = (text: string) => {
+    setTranscription(text);
+    onTranscription?.(text);
+    
+    // Add user message to conversation history
+    const userMessage = { role: 'user', content: text };
+    setConversationHistory(prev => [...prev, userMessage]);
+  };
+
+  // Process response using our voice prompt system
+  const processResponse = async (text: string) => {
+    const prompt = createVoicePrompt(text, conversationHistory);
+    const response = formatVoiceResponse(text);
+    
+    // Add assistant response to conversation history
+    const assistantMessage = { role: 'assistant', content: response };
+    setConversationHistory(prev => [...prev, assistantMessage]);
+    
+    return response;
+  };
 
   const initialize = async () => {
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
@@ -29,6 +63,22 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
     try {
       // Create a new WebRTC PeerConnection
       peerConnection.current = new RTCPeerConnection();
+
+      // Create data channel for transcriptions and responses
+      dataChannel.current = peerConnection.current.createDataChannel('transcription');
+      dataChannel.current.onmessage = async (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'transcription') {
+          handleTranscription(data.text);
+          // Process response using our prompt system
+          const response = await processResponse(data.text);
+          // Send response back through data channel
+          dataChannel.current?.send(JSON.stringify({ 
+            type: 'response',
+            text: response 
+          }));
+        }
+      };
 
       // Handle incoming audio stream
       peerConnection.current.ontrack = (e) => {
@@ -59,6 +109,12 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
           headers: {
             Authorization: `Bearer ${apiKey}`,
             'Content-Type': 'application/sdp',
+            'X-OpenAI-Voice': voice,
+            'X-OpenAI-Model': model,
+            'X-OpenAI-Assistant-Context': JSON.stringify({
+              prompt: VOICE_SYSTEM_PROMPT.content,
+              conversation_history: conversationHistory
+            })
           }
         });
 
@@ -89,6 +145,10 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
   };
 
   const disconnect = () => {
+    if (dataChannel.current) {
+      dataChannel.current.close();
+      dataChannel.current = null;
+    }
     if (peerConnection.current) {
       peerConnection.current.close();
       peerConnection.current = null;
@@ -108,7 +168,9 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
   return {
     isConnected,
     isStreaming,
+    transcription,
     initialize,
-    disconnect
+    disconnect,
+    conversationHistory
   };
 }
