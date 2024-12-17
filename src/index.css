@@ -84,21 +84,16 @@
 .typing-text {
   font-family: 'Courier New', Courier, monospace;
   border-right: 2px solid #fff;
+  white-space: nowrap;
   overflow: hidden;
   display: inline-block;
   width: max-content;
   animation: typing 6s steps(31, end) forwards;
 }
 
-@media (min-width: 640px) {
-  .typing-text {
-    white-space: nowrap;
-  }
-}
-
 @keyframes typing {
   from { width: 0 }
-  to { width: 100% }
+  to { width: 31ch }
 }
 
 @keyframes blink-caret {
