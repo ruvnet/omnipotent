@@ -20,11 +20,11 @@ export function useOpenAIVoice({
   // Handle incoming server events
   const handleServerEvent = (event: any) => {
     const data = JSON.parse(event.data);
+    console.log('Received server event:', data.type);
     
     switch (data.type) {
       case 'session.created':
         console.log('Session created:', data);
-        // Send session update with voice prompt configuration
         if (dataChannel.current) {
           dataChannel.current.send(JSON.stringify({
             type: 'session.update',
@@ -35,13 +35,10 @@ export function useOpenAIVoice({
         }
         break;
 
-      case 'session.updated':
-        console.log('Session updated:', data);
-        break;
-
       case 'input_audio_buffer.speech_started':
         setIsStreaming(true);
         if (data.audio) {
+          console.log('Creating user audio message');
           const message: VoiceMessage = {
             id: crypto.randomUUID(),
             type: 'user',
@@ -53,12 +50,9 @@ export function useOpenAIVoice({
         }
         break;
 
-      case 'input_audio_buffer.speech_stopped':
-        setIsStreaming(false);
-        break;
-
       case 'assistant.response':
         if (data.audio) {
+          console.log('Creating assistant audio message');
           const message: VoiceMessage = {
             id: crypto.randomUUID(),
             type: 'assistant',

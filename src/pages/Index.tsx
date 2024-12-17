@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -26,9 +26,18 @@ const Index = () => {
   const { toast } = useToast();
 
   const handleMessageReceived = (message: VoiceMessage) => {
-    console.log('Message received:', message);
-    setMessages(prev => [...prev, message]);
+    console.log('Message received in Index:', message);
+    setMessages(prevMessages => {
+      console.log('Previous messages:', prevMessages);
+      const newMessages = [...prevMessages, message];
+      console.log('New messages:', newMessages);
+      return newMessages;
+    });
   };
+
+  useEffect(() => {
+    console.log('Messages updated:', messages);
+  }, [messages]);
 
   const { initialize, disconnect, isConnected, isStreaming } = useOpenAIVoice({
     onStreamStart: () => {
