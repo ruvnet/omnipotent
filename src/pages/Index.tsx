@@ -26,6 +26,7 @@ const Index = () => {
   const { toast } = useToast();
 
   const handleMessageReceived = (message: VoiceMessage) => {
+    console.log('Message received:', message);
     setMessages(prev => [...prev, message]);
   };
 
