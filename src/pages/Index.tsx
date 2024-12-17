@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Mic, Square } from "lucide-react";
+import { Mic, Square, Heading } from "lucide-react";
 import { VoiceWave } from '@/components/VoiceWave';
 import { AudioMessage } from '@/components/AudioMessage';
 import { useToast } from '@/components/ui/use-toast';
@@ -61,6 +61,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-rose-50 to-orange-50">
+      <div className="flex flex-col items-center mb-8">
+        <Heading className="w-8 h-8 text-primary mb-2" />
+        <h1 className="text-2xl font-semibold text-primary/90">Voice Messages</h1>
+      </div>
+      
       <Card className="max-w-2xl mx-auto h-[80vh] glass-panel flex flex-col rounded-[2rem] overflow-hidden border-0">
         <div className="p-6 flex-1 space-y-4 overflow-y-auto">
           {messages.map((message) => (
