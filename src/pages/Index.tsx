@@ -1,10 +1,17 @@
 import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Mic, Square, Heading } from "lucide-react";
+import { Mic, Square, MessageSquare, Menu } from "lucide-react";
 import { VoiceWave } from '@/components/VoiceWave';
 import { AudioMessage } from '@/components/AudioMessage';
 import { useToast } from '@/components/ui/use-toast';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import "@fontsource/space-grotesk";
 
 interface AudioMessage {
   id: string;
@@ -61,9 +68,29 @@ const Index = () => {
 
   return (
     <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-rose-50 to-orange-50">
-      <div className="flex flex-col items-center mb-8">
-        <Heading className="w-8 h-8 text-primary mb-2" />
-        <h1 className="text-2xl font-semibold text-primary/90">Omnipotent</h1>
+      <div className="flex justify-between items-center mb-8 max-w-2xl mx-auto">
+        <div className="flex-1" /> {/* Spacer */}
+        <div className="flex flex-col items-center">
+          <MessageSquare className="w-8 h-8 text-primary mb-2" />
+          <h1 className="text-2xl font-semibold text-primary/90 font-space-grotesk">Omnipotent</h1>
+        </div>
+        <div className="flex-1 flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem>
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                About
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       
       <Card className="max-w-2xl mx-auto h-[80vh] glass-panel flex flex-col rounded-[2rem] overflow-hidden border-0">
@@ -72,7 +99,7 @@ const Index = () => {
             <AudioMessage key={message.id} message={message} />
           ))}
           {messages.length === 0 && (
-            <div className="flex items-center justify-center h-full text-muted-foreground/60 text-lg">
+            <div className="flex items-center justify-center h-full text-muted-foreground/60 text-lg font-space-grotesk">
               Start recording to send a voice message
             </div>
           )}
