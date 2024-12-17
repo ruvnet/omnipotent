@@ -28,17 +28,17 @@ export const AudioMessage = ({ message }: AudioMessageProps) => {
   };
 
   return (
-    <Card className="p-4 flex items-center gap-4">
+    <Card className="p-4 flex items-center gap-4 bg-white/40 border-0 backdrop-blur-sm rounded-2xl">
       <Button
         size="icon"
         variant="ghost"
-        className="rounded-full"
+        className="rounded-full hover:bg-primary/10 transition-colors"
         onClick={togglePlayback}
       >
         {isPlaying ? (
-          <Pause className="h-4 w-4" />
+          <Pause className="h-4 w-4 text-primary" />
         ) : (
-          <Play className="h-4 w-4" />
+          <Play className="h-4 w-4 text-primary" />
         )}
       </Button>
       <audio
@@ -51,7 +51,7 @@ export const AudioMessage = ({ message }: AudioMessageProps) => {
         {[...Array(5)].map((_, i) => (
           <span
             key={i}
-            className="!h-2"
+            className="!h-2 bg-primary"
             style={{
               animationDelay: `${i * 0.1}s`,
               animationPlayState: isPlaying ? 'running' : 'paused'

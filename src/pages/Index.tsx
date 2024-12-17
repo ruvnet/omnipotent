@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Mic, Square, Play, Pause } from "lucide-react";
+import { Mic, Square } from "lucide-react";
 import { VoiceWave } from '@/components/VoiceWave';
 import { AudioMessage } from '@/components/AudioMessage';
 import { useToast } from '@/components/ui/use-toast';
@@ -35,7 +35,7 @@ const Index = () => {
         setMessages(prev => [...prev, {
           id: Date.now().toString(),
           blob,
-          duration: 0 // You could calculate actual duration if needed
+          duration: 0
         }]);
         chunksRef.current = [];
       };
@@ -60,24 +60,26 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-8 flex flex-col max-w-2xl mx-auto">
-      <Card className="p-6 glass-panel flex-1 flex flex-col">
-        <div className="flex-1 space-y-4 mb-4">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-rose-50 to-orange-50">
+      <Card className="max-w-2xl mx-auto h-[80vh] glass-panel flex flex-col rounded-[2rem] overflow-hidden border-0">
+        <div className="p-6 flex-1 space-y-4 overflow-y-auto">
           {messages.map((message) => (
             <AudioMessage key={message.id} message={message} />
           ))}
           {messages.length === 0 && (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
+            <div className="flex items-center justify-center h-full text-muted-foreground/60 text-lg">
               Start recording to send a voice message
             </div>
           )}
         </div>
         
-        <div className="flex justify-center items-center gap-4">
+        <div className="p-8 flex justify-center items-center gap-6 border-t border-white/10 bg-white/5 backdrop-blur-sm">
           <Button
             size="lg"
             variant={isRecording ? "destructive" : "default"}
-            className={`rounded-full w-16 h-16 p-0 ${isRecording ? 'recording-pulse' : ''}`}
+            className={`rounded-full w-16 h-16 p-0 transition-all duration-300 hover:scale-105 ${
+              isRecording ? 'bg-red-500 hover:bg-red-600 recording-pulse' : 'bg-primary hover:bg-primary/90'
+            }`}
             onClick={isRecording ? stopRecording : startRecording}
           >
             {isRecording ? (
