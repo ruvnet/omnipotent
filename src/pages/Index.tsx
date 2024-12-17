@@ -106,7 +106,7 @@ const Index = () => {
           ))}
           {messages.length === 0 && (
             <div className="flex items-center justify-center h-full text-muted-foreground/60 text-lg font-space-grotesk">
-              Start recording to send a voice message
+              Speak with your AI consciousness
             </div>
           )}
         </div>
