@@ -73,18 +73,18 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-rose-50 to-orange-50">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-red-950 via-red-900 to-black">
       <div className="flex justify-between items-center mb-8 max-w-2xl mx-auto">
         <div className="flex-1" />
         <div className="flex flex-col items-center">
-          <MessageSquare className="w-8 h-8 text-primary mb-2" />
-          <h1 className="text-2xl font-semibold text-primary/90 font-space-grotesk">Omnipotent</h1>
+          <MessageSquare className="w-8 h-8 text-red-500 mb-2" />
+          <h1 className="text-2xl font-semibold text-red-500/90 font-space-grotesk">Omnipotent</h1>
         </div>
         <div className="flex-1 flex justify-end">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
-                <Menu className="h-5 w-5" />
+                <Menu className="h-5 w-5 text-white" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
@@ -105,8 +105,8 @@ const Index = () => {
             <AudioMessage key={message.id} message={message} />
           ))}
           {messages.length === 0 && (
-            <div className="flex items-center justify-center h-full text-muted-foreground/60 text-lg font-space-grotesk">
-              Speak with your AI consciousness
+            <div className="flex items-center justify-center h-full text-white text-lg">
+              <div className="typing-text">Speak with your AI consciousness</div>
             </div>
           )}
         </div>

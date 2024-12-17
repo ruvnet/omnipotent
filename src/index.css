@@ -34,7 +34,6 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    font-family: 'Space Grotesk', sans-serif;
   }
 }
 
@@ -80,4 +79,24 @@
     opacity: .5;
     transform: scale(1.1);
   }
+}
+
+.typing-text {
+  font-family: 'Courier New', Courier, monospace;
+  border-right: 2px solid #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  display: inline-block;
+  width: max-content;
+  animation: typing 6s steps(31, end) forwards;
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 31ch }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: #fff }
 }
