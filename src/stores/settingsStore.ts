@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { VOICE_SYSTEM_PROMPT } from '@/lib/voice-prompt';
 
 export type VoiceOption = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
 export type ModelOption = 'tts-1' | 'tts-1-hd';
@@ -26,7 +27,7 @@ export const useSettings = create<SettingsState>()(
     (set) => ({
       voice: 'nova',
       model: 'tts-1',
-      prompt: "You are a helpful AI assistant named Omnipotent. Respond naturally and warmly.",
+      prompt: VOICE_SYSTEM_PROMPT.content,
       story: "In a world where AI and humans collaborate seamlessly...",
       character: {
         name: "Omnipotent",
