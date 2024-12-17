@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { useSettings } from '@/stores/settingsStore';
-import { createVoicePrompt, formatVoiceResponse, VOICE_SYSTEM_PROMPT } from '@/lib/voice-prompt';
+import { createVoicePrompt, formatVoiceResponse } from '@/lib/voice-prompt';
 
 interface UseOpenAIVoiceProps {
   onStreamStart?: () => void;
@@ -22,7 +22,7 @@ export function useOpenAIVoice({
   const [isStreaming, setIsStreaming] = useState(false);
   const [transcription, setTranscription] = useState<string>('');
   const { toast } = useToast();
-  const { voice, model } = useSettings();
+  const { voice, model, prompt } = useSettings();
   const [conversationHistory, setConversationHistory] = useState<Array<{ role: string; content: string }>>([]);
 
   // Handle incoming transcription from OpenAI
@@ -37,7 +37,7 @@ export function useOpenAIVoice({
 
   // Process response using our voice prompt system
   const processResponse = async (text: string) => {
-    const prompt = createVoicePrompt(text, conversationHistory);
+    const customPrompt = { role: 'system', content: prompt };
     const response = formatVoiceResponse(text);
     
     // Add assistant response to conversation history
@@ -61,18 +61,14 @@ export function useOpenAIVoice({
     }
 
     try {
-      // Create a new WebRTC PeerConnection
       peerConnection.current = new RTCPeerConnection();
 
-      // Create data channel for transcriptions and responses
       dataChannel.current = peerConnection.current.createDataChannel('transcription');
       dataChannel.current.onmessage = async (event) => {
         const data = JSON.parse(event.data);
         if (data.type === 'transcription') {
           handleTranscription(data.text);
-          // Process response using our prompt system
           const response = await processResponse(data.text);
-          // Send response back through data channel
           dataChannel.current?.send(JSON.stringify({ 
             type: 'response',
             text: response 
@@ -80,7 +76,6 @@ export function useOpenAIVoice({
         }
       };
 
-      // Handle incoming audio stream
       peerConnection.current.ontrack = (e) => {
         const audioElement = document.createElement('audio');
         audioElement.srcObject = e.streams[0];
@@ -91,21 +86,18 @@ export function useOpenAIVoice({
       };
 
       try {
-        // Get microphone access and add track to peer connection
         const localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         peerConnection.current.addTrack(localStream.getTracks()[0]);
       } catch (err) {
         throw new Error(`Microphone error: ${err instanceof Error ? err.message : 'Unknown error'}`);
       }
 
-      // Create and set local description
       const offer = await peerConnection.current.createOffer();
       await peerConnection.current.setLocalDescription(offer);
 
       try {
-        // Create headers with the current voice and model settings
         const currentVoice = voice || 'alloy';
-        const currentModel = model || 'gpt-4';
+        const currentModel = model || 'tts-1';
         
         const headers = new Headers({
           'Authorization': `Bearer ${apiKey}`,
@@ -114,15 +106,15 @@ export function useOpenAIVoice({
           'X-OpenAI-Model': currentModel,
         });
 
-        // Add context as a separate header
         const contextHeader = JSON.stringify({
-          prompt: VOICE_SYSTEM_PROMPT.content,
+          prompt: prompt,
           conversation_history: conversationHistory,
-          voice: currentVoice // Include voice in context
+          voice: currentVoice
         });
         headers.append('X-OpenAI-Assistant-Context', contextHeader);
 
-        console.log('Using voice:', currentVoice); // Debug log
+        console.log('Using voice:', currentVoice);
+        console.log('Using prompt:', prompt);
 
         const resp = await fetch('https://api.openai.com/v1/realtime', {
           method: 'POST',
@@ -134,7 +126,6 @@ export function useOpenAIVoice({
           throw new Error(`API error: ${resp.status} ${resp.statusText}`);
         }
 
-        // Set remote description from OpenAI's answer
         await peerConnection.current.setRemoteDescription({
           type: 'answer',
           sdp: await resp.text()
@@ -170,7 +161,6 @@ export function useOpenAIVoice({
     }
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       disconnect();
