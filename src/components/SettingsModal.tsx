@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useSettings, VoiceOption, ModelOption } from "@/stores/settingsStore";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
+import { useEffect } from "react";
 
 const VOICE_OPTIONS: VoiceOption[] = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'];
 const MODEL_OPTIONS: ModelOption[] = ['tts-1', 'tts-1-hd'];
@@ -37,23 +38,20 @@ export function SettingsModal({ open, onOpenChange }: { open: boolean; onOpenCha
     onOpenChange(false);
   };
 
-  const handleOpenChange = (newOpen: boolean) => {
-    onOpenChange(newOpen);
-    // Ensure any lingering overlay elements are removed
-    if (!newOpen) {
-      setTimeout(() => {
-        const overlays = document.querySelectorAll('[role="presentation"]');
-        overlays.forEach(overlay => {
-          if (overlay.parentNode) {
-            overlay.parentNode.removeChild(overlay);
-          }
-        });
-      }, 100);
-    }
-  };
+  // Cleanup function to remove any lingering overlays
+  useEffect(() => {
+    return () => {
+      const overlays = document.querySelectorAll('[role="presentation"]');
+      overlays.forEach(overlay => {
+        if (overlay.parentNode) {
+          overlay.parentNode.removeChild(overlay);
+        }
+      });
+    };
+  }, []);
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
