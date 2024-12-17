@@ -15,7 +15,7 @@ export const ScrollingResponse = ({ text, isVisible }: ScrollingResponseProps) =
     )}>
       <div className="max-w-xl w-full h-[40vh] overflow-hidden">
         <div className={cn(
-          "animate-scroll bg-gradient-to-t from-transparent via-black/80 to-transparent p-6 text-center",
+          "bg-black/80 p-6 text-center",
           "text-white font-space-grotesk text-lg leading-relaxed"
         )}>
           <div className="whitespace-pre-wrap">

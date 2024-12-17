@@ -70,10 +70,6 @@ const config = {
         wave: {
           "0%, 100%": { transform: "scaleY(0.5)" },
           "50%": { transform: "scaleY(2)" },
-        },
-        scroll: {
-          '0%': { transform: 'translateY(100%)' },
-          '100%': { transform: 'translateY(-100%)' }
         }
       },
       animation: {
@@ -81,7 +77,6 @@ const config = {
         "accordion-up": "accordion-up 0.2s ease-out",
         "wave": "wave 1s ease-in-out infinite",
         "wave-fast": "wave 0.5s ease-in-out infinite",
-        "scroll": "scroll 20s linear infinite",
       },
     },
   },
