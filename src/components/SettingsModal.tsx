@@ -15,10 +15,18 @@ export function SettingsModal({ open, onOpenChange }: { open: boolean; onOpenCha
 
   const handleVoiceChange = (value: string) => {
     setVoice(value as VoiceOption);
+    toast({
+      title: "Voice Changed",
+      description: "Reconnecting with new voice settings...",
+    });
   };
 
   const handleModelChange = (value: string) => {
     setModel(value as ModelOption);
+    toast({
+      title: "Model Changed",
+      description: "Reconnecting with new model settings...",
+    });
   };
 
   const handleSave = () => {
@@ -72,6 +80,9 @@ export function SettingsModal({ open, onOpenChange }: { open: boolean; onOpenCha
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-sm text-muted-foreground">
+                  Changing the voice will reconnect the streaming session.
+                </p>
               </div>
               
               <div className="space-y-2">
@@ -88,6 +99,9 @@ export function SettingsModal({ open, onOpenChange }: { open: boolean; onOpenCha
                     ))}
                   </SelectContent>
                 </Select>
+                <p className="text-sm text-muted-foreground">
+                  Changing the model will reconnect the streaming session.
+                </p>
               </div>
             </div>
           </TabsContent>
