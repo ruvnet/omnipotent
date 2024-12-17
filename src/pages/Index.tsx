@@ -39,6 +39,7 @@ const Index = () => {
         description: "Voice streaming has started",
       });
       setShowScrollingText(true);
+      setTranscribedText(''); // Reset text when starting new stream
     },
     onStreamEnd: () => {
       toast({
@@ -57,6 +58,9 @@ const Index = () => {
       });
       setIsRecording(false);
       setShowScrollingText(false);
+    },
+    onTranscriptUpdate: (text) => {
+      setTranscribedText(text);
     }
   });
 
