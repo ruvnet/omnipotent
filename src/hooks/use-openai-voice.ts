@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { useSettings } from '@/stores/settingsStore';
-import { formatVoiceResponse } from '@/lib/voice-prompt';
+import { VOICE_SYSTEM_PROMPT } from '@/lib/voice-prompt';
 
 interface UseOpenAIVoiceProps {
   onStreamStart?: () => void;
@@ -14,36 +14,8 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
   const dataChannel = useRef<RTCDataChannel | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [transcription, setTranscription] = useState<string>('');
   const { toast } = useToast();
-  const { voice, model, prompt } = useSettings();
-  const [conversationHistory, setConversationHistory] = useState<Array<{ role: string; content: string }>>([]);
-
-  // Update conversation history when prompt changes
-  useEffect(() => {
-    setConversationHistory([{ role: 'system', content: prompt }]);
-    console.log('Prompt updated, new conversation history:', [{ role: 'system', content: prompt }]);
-  }, [prompt]);
-
-  // Handle incoming transcription from OpenAI
-  const handleTranscription = (text: string) => {
-    setTranscription(text);
-    processResponse(text);
-  };
-
-  // Process response using our voice prompt system
-  const processResponse = async (text: string) => {
-    const response = formatVoiceResponse(text);
-    
-    // Add assistant response to conversation history
-    setConversationHistory(prev => [
-      ...prev,
-      { role: 'assistant', content: response }
-    ]);
-
-    // Log the updated conversation history
-    console.log('Updated conversation history:', conversationHistory);
-  };
+  const { voice, model } = useSettings();
 
   // Handle incoming server events
   const handleServerEvent = (event: any) => {
@@ -52,12 +24,12 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
     switch (data.type) {
       case 'session.created':
         console.log('Session created:', data);
-        // Send session update with current prompt
+        // Send session update with voice prompt configuration
         if (dataChannel.current) {
           dataChannel.current.send(JSON.stringify({
             type: 'session.update',
             session: {
-              instructions: prompt
+              instructions: VOICE_SYSTEM_PROMPT.content
             }
           }));
         }
@@ -67,18 +39,12 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
         console.log('Session updated:', data);
         break;
 
-      case 'transcription':
-        handleTranscription(data.text);
-        break;
-
       case 'input_audio_buffer.speech_started':
         setIsStreaming(true);
-        onStreamStart?.();
         break;
 
       case 'input_audio_buffer.speech_stopped':
         setIsStreaming(false);
-        onStreamEnd?.();
         break;
 
       case 'error':
@@ -94,6 +60,11 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
   };
 
   const initialize = async () => {
+    if (isStreaming) {
+      disconnect();
+      return;
+    }
+
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
     if (!apiKey) {
       const message = 'OpenAI API key not found in environment variables';
@@ -123,6 +94,7 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
       };
 
       try {
+        // Get microphone access and add track to peer connection
         const localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         peerConnection.current.addTrack(localStream.getTracks()[0]);
       } catch (err) {
@@ -134,13 +106,6 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
       await peerConnection.current.setLocalDescription(offer);
 
       try {
-        const currentVoice = voice || 'nova';
-        const currentModel = model || 'tts-1';
-        
-        console.log('Using voice:', currentVoice);
-        console.log('Using prompt:', prompt);
-        console.log('Conversation history:', conversationHistory);
-
         const resp = await fetch('https://api.openai.com/v1/realtime', {
           method: 'POST',
           body: offer.sdp,
@@ -148,8 +113,8 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
             Authorization: `Bearer ${apiKey}`,
             'Content-Type': 'application/sdp',
             'OpenAI-Beta': 'realtime-speech',
-            'X-Voice': currentVoice,
-            'X-Model': currentModel
+            'X-Voice': voice || 'nova',
+            'X-Model': model || 'tts-1'
           }
         });
 
@@ -157,12 +122,14 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
           throw new Error(`API error: ${resp.status} ${resp.statusText}`);
         }
 
+        // Set remote description from OpenAI's answer
         await peerConnection.current.setRemoteDescription({
           type: 'answer',
           sdp: await resp.text()
         });
 
         setIsConnected(true);
+        setIsStreaming(true);
         toast({
           title: "Connected to OpenAI",
           description: "Voice streaming is ready",
@@ -191,27 +158,15 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
     if (peerConnection.current) {
       peerConnection.current.close();
       peerConnection.current = null;
-      if (isConnected) {
-        setIsConnected(false);
-        setIsStreaming(false);
-        toast({
-          title: "Disconnected",
-          description: "Voice streaming has ended",
-        });
-        onStreamEnd?.();
-      }
+      setIsConnected(false);
+      setIsStreaming(false);
+      toast({
+        title: "Disconnected",
+        description: "Voice streaming has ended",
+      });
+      onStreamEnd?.();
     }
   };
-
-  // Handle voice/model/prompt changes
-  useEffect(() => {
-    if (isConnected) {
-      disconnect();
-      setTimeout(() => {
-        initialize();
-      }, 1000);
-    }
-  }, [voice, model, prompt]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -224,7 +179,6 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
     isConnected,
     isStreaming,
     initialize,
-    disconnect,
-    transcription
+    disconnect
   };
 }
