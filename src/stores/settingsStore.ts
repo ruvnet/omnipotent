@@ -30,11 +30,12 @@ export const useSettings = create<SettingsState>((set) => ({
     personality: ["Warm", "Helpful", "Knowledgeable"],
     background: "An AI assistant designed to help humans achieve their goals.",
   },
-  setVoice: (voice) => set({ voice }),
-  setModel: (model) => set({ model }),
-  setPrompt: (prompt) => set({ prompt }),
-  setStory: (story) => set({ story }),
+  setVoice: (voice) => set((state) => ({ ...state, voice })),
+  setModel: (model) => set((state) => ({ ...state, model })),
+  setPrompt: (prompt) => set((state) => ({ ...state, prompt })),
+  setStory: (story) => set((state) => ({ ...state, story })),
   setCharacter: (character) => set((state) => ({
+    ...state,
     character: { ...state.character, ...character }
   })),
 }));

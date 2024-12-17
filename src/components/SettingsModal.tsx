@@ -11,6 +11,14 @@ const MODEL_OPTIONS: ModelOption[] = ['tts-1', 'tts-1-hd'];
 export function SettingsModal({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { voice, model, prompt, setVoice, setModel, setPrompt } = useSettings();
 
+  const handleVoiceChange = (value: string) => {
+    setVoice(value as VoiceOption);
+  };
+
+  const handleModelChange = (value: string) => {
+    setModel(value as ModelOption);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
@@ -27,7 +35,7 @@ export function SettingsModal({ open, onOpenChange }: { open: boolean; onOpenCha
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Voice</Label>
-                <Select value={voice} onValueChange={(value) => setVoice(value as VoiceOption)}>
+                <Select value={voice} onValueChange={handleVoiceChange}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -43,7 +51,7 @@ export function SettingsModal({ open, onOpenChange }: { open: boolean; onOpenCha
               
               <div className="space-y-2">
                 <Label>Model</Label>
-                <Select value={model} onValueChange={(value) => setModel(value as ModelOption)}>
+                <Select value={model} onValueChange={handleModelChange}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
