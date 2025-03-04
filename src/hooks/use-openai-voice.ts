@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { useToast } from "../components/ui/use-toast";
 import { useSettings } from "../stores/settingsStore";
 import { VOICE_SYSTEM_PROMPT } from "../lib/voice-prompt";
+import { logWebRTCStats, runAudioDiagnostic } from "../lib/audio-debug";
 
 interface UseOpenAIVoiceProps {
   onStreamStart?: () => void;
@@ -14,12 +15,52 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
   const dataChannel = useRef<RTCDataChannel | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [diagnosticRun, setDiagnosticRun] = useState(false);
+  const statsIntervalRef = useRef<number | null>(null);
   const { toast } = useToast();
   const { voice, model } = useSettings();
+  
+  // Run audio diagnostics when there's an issue
+  const runDiagnostics = async () => {
+    if (diagnosticRun) return; // Only run once per session
+    
+    setDiagnosticRun(true);
+    console.log('🔍 Running audio diagnostics...');
+    
+    try {
+      const results = await runAudioDiagnostic();
+      
+      if (results.issues.length > 0) {
+        console.warn('⚠️ Audio diagnostic issues detected:');
+        results.issues.forEach(issue => console.warn(`- ${issue}`));
+        
+        toast({
+          title: "Audio Issues Detected",
+          description: results.issues[0],
+          variant: "destructive",
+        });
+      }
+      
+      // Log WebRTC stats if connection exists
+      if (peerConnection.current) {
+        await logWebRTCStats(peerConnection.current);
+      }
+    } catch (error) {
+      console.error('Error running audio diagnostics:', error);
+    }
+  };
+
+  // Define types for WebRTC message events
+  interface ServerEventData {
+    type: string;
+    message?: string;
+    [key: string]: unknown;
+  }
 
   // Handle incoming server events
-  const handleServerEvent = (event: any) => {
-    const data = JSON.parse(event.data);
+  const handleServerEvent = (event: MessageEvent) => {
+    const data = JSON.parse(event.data) as ServerEventData;
+    let errorMessage: string;
     
     switch (data.type) {
       case 'session.created':
@@ -48,13 +89,13 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
         break;
 
       case 'error':
-        const message = data.message || 'An error occurred';
+        errorMessage = data.message || 'An error occurred';
         toast({
           title: "Error",
-          description: message,
+          description: errorMessage,
           variant: "destructive",
         });
-        onError?.(message);
+        onError?.(errorMessage);
         break;
     }
   };
@@ -78,8 +119,26 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
     }
 
     try {
-      // Create a new WebRTC PeerConnection
-      peerConnection.current = new RTCPeerConnection();
+      // Create a new WebRTC PeerConnection with STUN/TURN servers to help with NAT traversal
+      peerConnection.current = new RTCPeerConnection({
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' },
+          { urls: 'stun:stun3.l.google.com:19302' },
+          { urls: 'stun:stun4.l.google.com:19302' }
+        ],
+        iceCandidatePoolSize: 10
+      });
+      
+      // Log ICE candidate gathering
+      peerConnection.current.onicecandidate = (event) => {
+        if (event.candidate) {
+          console.log('🧊 New ICE candidate:', event.candidate.candidate);
+        } else {
+          console.log('🧊 ICE candidate gathering complete');
+        }
+      };
 
       // Create data channel for events
       dataChannel.current = peerConnection.current.createDataChannel('events');
@@ -87,10 +146,62 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
 
       // Handle incoming audio stream
       peerConnection.current.ontrack = (e) => {
+        console.log('🎵 Audio track received:', e.streams);
+        
+        if (!e.streams || e.streams.length === 0) {
+          console.error('❌ No audio streams received from OpenAI');
+          return;
+        }
+        
+        const audioStream = e.streams[0];
+        if (!audioStream.active) {
+          console.warn('⚠️ Audio stream is not active');
+        }
+        
+        // Create and configure audio element
         const audioElement = document.createElement('audio');
-        audioElement.srcObject = e.streams[0];
+        audioElement.srcObject = audioStream;
         audioElement.autoplay = true;
+        audioElement.id = 'openai-voice-audio';
+        
+        // Add event listeners for debugging
+        audioElement.onplay = () => console.log('▶️ Audio playback started');
+        audioElement.onpause = () => console.log('⏸️ Audio playback paused');
+        audioElement.onended = () => console.log('⏹️ Audio playback ended');
+        audioElement.onerror = (err) => console.error('❌ Audio playback error:', err);
+        
+        // Try to play the audio
+        const playPromise = audioElement.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('✅ Audio is playing successfully');
+              
+              // Set up periodic WebRTC stats logging
+              if (statsIntervalRef.current === null) {
+                statsIntervalRef.current = window.setInterval(() => {
+                  if (peerConnection.current) {
+                    logWebRTCStats(peerConnection.current).catch(console.error);
+                  }
+                }, 10000); // Log stats every 10 seconds
+              }
+            })
+            .catch(err => {
+              console.error('❌ Audio playback failed:', err);
+              toast({
+                title: "Audio Playback Error",
+                description: `Failed to play audio: ${err.message}`,
+                variant: "destructive",
+              });
+              
+              // Run diagnostics when audio playback fails
+              runDiagnostics().catch(console.error);
+            });
+        }
+        
+        // Append to document body
         document.body.appendChild(audioElement);
+        console.log('🔊 Audio element added to DOM:', audioElement);
       };
 
       try {
@@ -168,9 +279,52 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
     }
   };
 
+  // Add WebRTC connection event handlers
+  useEffect(() => {
+    if (!peerConnection.current) return;
+    
+    const pc = peerConnection.current;
+    
+    // Connection state change handler
+    const handleConnectionStateChange = () => {
+      console.log(`WebRTC connection state changed: ${pc.connectionState}`);
+      
+      if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+        console.error('❌ WebRTC connection failed or disconnected');
+        runDiagnostics().catch(console.error);
+      }
+    };
+    
+    // ICE connection state change handler
+    const handleIceConnectionStateChange = () => {
+      console.log(`ICE connection state changed: ${pc.iceConnectionState}`);
+      
+      if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
+        console.error('❌ ICE connection failed or disconnected');
+        runDiagnostics().catch(console.error);
+      }
+    };
+    
+    // Add event listeners
+    pc.addEventListener('connectionstatechange', handleConnectionStateChange);
+    pc.addEventListener('iceconnectionstatechange', handleIceConnectionStateChange);
+    
+    // Cleanup
+    return () => {
+      pc.removeEventListener('connectionstatechange', handleConnectionStateChange);
+      pc.removeEventListener('iceconnectionstatechange', handleIceConnectionStateChange);
+    };
+  }, [peerConnection.current]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      // Clear stats logging interval
+      if (statsIntervalRef.current !== null) {
+        window.clearInterval(statsIntervalRef.current);
+        statsIntervalRef.current = null;
+      }
+      
       disconnect();
     };
   }, []);
@@ -179,6 +333,7 @@ export function useOpenAIVoice({ onStreamStart, onStreamEnd, onError }: UseOpenA
     isConnected,
     isStreaming,
     initialize,
-    disconnect
+    disconnect,
+    runDiagnostics // Expose diagnostics function
   };
 }
